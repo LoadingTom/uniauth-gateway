@@ -17,6 +17,15 @@ import (
 func ReverseProxy(r *ghttp.Request) {
 	ctx := r.Context()
 
+	// 记录请求上下文
+	sessionID := r.Session.MustId()
+	userID := r.Session.MustGet("user_id").String()
+	protocol := "http"
+	if r.TLS != nil {
+		protocol = "https"
+	}
+	g.Log().Infof(ctx, `[网关-请求] method=%s url=%s session=%s user=%s remote=%s ua=%s protocol=%s`, r.Method, r.URL.String(), sessionID, userID, r.RemoteAddr, r.Header.Get("User-Agent"), protocol)
+
 	// 规则一，查看请求头请求的服务
 	service := r.Header.Get("X-Service")
 	if service == "" {
