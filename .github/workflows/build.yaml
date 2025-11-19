@@ -6,7 +6,7 @@ on:
       - "v*"
 
 env:
-  IMAGE_NAME: ghcr.io/nickwilde18/uniauth-gateway
+  IMAGE_NAME: ghcr.io/loadingtom/uniauth-gateway
   MANIFEST_REPO_OWNER: CUHKSZ-ITSO-Dev
   MANIFEST_REPO_NAME: GPT-Cluster
   MANIFEST_DEPLOY_BRANCH: main
