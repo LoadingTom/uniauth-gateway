@@ -42,8 +42,27 @@ func ReverseProxy(r *ghttp.Request) {
 		service = pathList[1]
 	}
 
-	// 检查微服务权限
-	uniGf.CheckPermission(ctx, r.Session.MustGet("user_id").String(), service, "access")
+	// 判断是否需要跳过鉴权：X-Service 为 uniauth-gf 且路径在允许列表中
+	skipAuth := false
+	if service == "uniauth-gf" {
+		allowedPaths := []string{
+			"/config/i18n/apps",
+			"/config/i18n/lang",
+			"/config/i18n/langs",
+		}
+		requestPath := r.URL.Path
+		for _, allowedPath := range allowedPaths {
+			if strings.HasPrefix(requestPath, allowedPath) {
+				skipAuth = true
+				break
+			}
+		}
+	}
+
+	// 检查微服务权限（满足条件时跳过）
+	if !skipAuth {
+		uniGf.CheckPermission(ctx, r.Session.MustGet("user_id").String(), service, "access")
+	}
 
 	// 获取服务对应的代理地址
 	proxyHostMap := g.Cfg("proxy_host_map").MustData(ctx)
