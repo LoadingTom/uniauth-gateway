@@ -64,13 +64,14 @@ var (
 				s.SetSessionStorage(gsession.NewStorageMemory())
 			}
 
-			// 全局中间件 - 错误处理
-			s.Use(middlewares.ErrorHandler)
+			// 全局中间件
+			s.Use(middlewares.ReturnSessionTTL) // 返回会话 TTL
+			s.Use(middlewares.ErrorHandler)     // 错误处理
 
 			// 特殊处理 favicon.png
 			s.BindHandler("GET:/favicon.png", func(r *ghttp.Request) {
 				r.Response.Header().Set("Content-Type", "image/png")
-				r.Response.WriteStatusExit(http.StatusOK, favicon)
+				r.Response.WriteStatus(http.StatusOK, favicon)
 			})
 
 			// 不需要登录验证的路由组
@@ -83,7 +84,7 @@ var (
 
 			// 需要登录验证的路由组
 			s.Group("/", func(group *ghttp.RouterGroup) {
-				group.Middleware(middlewares.VerifyLoginStatus)
+				group.Middleware(middlewares.VerifyLoginStatus) // 验证登录状态 + 续期会话
 				group.ALL("/*", proxy.ReverseProxy)
 			})
 
